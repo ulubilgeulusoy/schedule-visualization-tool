@@ -106,6 +106,16 @@
       max-width: 720px;
     }
 
+    .auth-status {
+      color: var(--muted);
+      font-size: 0.82rem;
+      align-self: center;
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .tabs {
       display: flex;
       gap: 8px;
@@ -526,6 +536,9 @@
           <button id="exportBtn" type="button">Export JSON</button>
           <button id="importBtn" type="button">Import JSON</button>
           <button id="resetBtn" class="danger" type="button">Reset</button>
+          <button id="signInBtn" type="button">Sign In</button>
+          <button id="signOutBtn" type="button">Sign Out</button>
+          <span class="auth-status" id="authStatus">View only</span>
           <input class="file-input" id="importFile" type="file" accept="application/json,.json">
         </div>
       </div>
@@ -609,8 +622,39 @@
     </main>
   </div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      onAuthStateChanged,
+      signInWithPopup,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+    import {
+      doc,
+      getDoc,
+      getFirestore,
+      onSnapshot,
+      serverTimestamp,
+      setDoc
+    } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
     const STORAGE_KEY = "campaign-schedule-v1";
+    const CAMPAIGN_DOC_PATH = ["campaigns", "adapt2-2026"];
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdtJlVRDXr8x3k9GCfOzGpOhGqvidkiu8",
+      authDomain: "adapt2-schedule.firebaseapp.com",
+      projectId: "adapt2-schedule",
+      storageBucket: "adapt2-schedule.firebasestorage.app",
+      messagingSenderId: "235290453657",
+      appId: "1:235290453657:web:3bf4328a890eba9174fa08"
+    };
+    const firebaseApp = initializeApp(firebaseConfig);
+    const auth = getAuth(firebaseApp);
+    const db = getFirestore(firebaseApp);
+    const campaignRef = doc(db, ...CAMPAIGN_DOC_PATH);
+
     const SOURCE_TIME_ZONE = "Europe/Berlin";
     const DEFAULT_DISPLAY_TIME_ZONE = "Europe/Berlin";
     const TIME_ZONE_LABELS = {
@@ -733,6 +777,9 @@
     let { days, colors, timeZone } = loadState();
     let currentDayId = days[0].id;
     let selectedId = null;
+    let currentUser = null;
+    let remoteLoaded = false;
+    let applyingRemoteState = false;
 
     const dayTabs = document.getElementById("dayTabs");
     const dayTitle = document.getElementById("dayTitle");
@@ -749,6 +796,9 @@
     const replaceFromInput = document.getElementById("replaceFromInput");
     const replaceToInput = document.getElementById("replaceToInput");
     const timezoneSelect = document.getElementById("timezoneSelect");
+    const signInBtn = document.getElementById("signInBtn");
+    const signOutBtn = document.getElementById("signOutBtn");
+    const authStatus = document.getElementById("authStatus");
 
     function item(start, end, activity, remarks, responsible) {
       return {
@@ -778,8 +828,23 @@
       }
     }
 
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ days, colors, timeZone }));
+    function scheduleState() {
+      return { days, colors, timeZone };
+    }
+
+    async function saveState() {
+      const state = scheduleState();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if (!currentUser || applyingRemoteState) return;
+      try {
+        await setDoc(campaignRef, {
+          ...state,
+          updatedAt: serverTimestamp(),
+          updatedBy: currentUser.email || currentUser.uid
+        }, { merge: true });
+      } catch (error) {
+        alert(`Could not save to Firebase: ${error.message}`);
+      }
     }
 
     function normalizeTimeZone(zone) {
@@ -1152,7 +1217,7 @@
     }
 
     function exportJson() {
-      const blob = new Blob([JSON.stringify({ days, colors }, null, 2)], { type: "application/json" });
+      const blob = new Blob([JSON.stringify(scheduleState(), null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -1194,6 +1259,7 @@
       timeZone = DEFAULT_DISPLAY_TIME_ZONE;
       currentDayId = days[0].id;
       selectedId = null;
+      saveState();
       render();
       clearForm();
     }
@@ -1243,6 +1309,47 @@
       renderTable(day);
       renderDetail(day);
       document.getElementById("daySelect").value = currentDayId;
+      updateEditAccess();
+    }
+
+    function updateEditAccess() {
+      const canEdit = Boolean(currentUser);
+      const editableControls = [
+        document.getElementById("addNewBtn"),
+        document.getElementById("resetBtn"),
+        document.getElementById("importBtn"),
+        replaceFromInput,
+        replaceToInput,
+        ...form.querySelectorAll("input, select, textarea, button"),
+        ...replacePersonForm.querySelectorAll("input, select, button")
+      ];
+      editableControls.forEach(control => {
+        if (control) control.disabled = !canEdit;
+      });
+      signInBtn.style.display = canEdit ? "none" : "";
+      signOutBtn.style.display = canEdit ? "" : "none";
+      authStatus.textContent = canEdit ? `Editing as ${currentUser.email || "signed-in user"}` : "View only";
+    }
+
+    function applyRemoteState(data) {
+      if (!data || !Array.isArray(data.days)) return;
+      applyingRemoteState = true;
+      days = data.days;
+      colors = { ...DEFAULT_COLORS, ...(data.colors || {}) };
+      timeZone = normalizeTimeZone(data.timeZone || timeZone);
+      if (!days.some(day => day.id === currentDayId)) currentDayId = days[0].id;
+      selectedId = null;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(scheduleState()));
+      remoteLoaded = true;
+      render();
+      clearForm();
+      applyingRemoteState = false;
+    }
+
+    async function seedFirestoreIfEmpty() {
+      if (!currentUser) return;
+      const snapshot = await getDoc(campaignRef);
+      if (!snapshot.exists()) await saveState();
     }
 
     form.addEventListener("submit", handleSubmit);
@@ -1261,10 +1368,40 @@
     document.getElementById("exportBtn").addEventListener("click", exportJson);
     document.getElementById("importBtn").addEventListener("click", () => importFile.click());
     document.getElementById("resetBtn").addEventListener("click", resetSchedule);
+    signInBtn.addEventListener("click", async () => {
+      try {
+        await signInWithPopup(auth, new GoogleAuthProvider());
+      } catch (error) {
+        alert(`Sign-in failed: ${error.message}`);
+      }
+    });
+    signOutBtn.addEventListener("click", () => signOut(auth));
     importFile.addEventListener("change", event => {
       const [file] = event.target.files;
       if (file) importJson(file);
       event.target.value = "";
+    });
+
+    onAuthStateChanged(auth, async user => {
+      currentUser = user;
+      updateEditAccess();
+      if (user) {
+        try {
+          await seedFirestoreIfEmpty();
+        } catch (error) {
+          alert(`Could not initialize Firebase data: ${error.message}`);
+        }
+      }
+    });
+
+    onSnapshot(campaignRef, snapshot => {
+      if (snapshot.exists()) applyRemoteState(snapshot.data());
+      else {
+        remoteLoaded = false;
+        render();
+      }
+    }, error => {
+      authStatus.textContent = `Firebase error: ${error.message}`;
     });
 
     render();

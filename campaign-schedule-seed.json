@@ -1,0 +1,614 @@
+{
+  "days": [
+    {
+      "id": "day-1",
+      "title": "Campaign Day 1 - Tuesday - 13.10.2026",
+      "items": [
+        {
+          "id": "day-1-item-001",
+          "start": "08:30",
+          "end": "09:00",
+          "activity": "LUNA facility introduction",
+          "remarks": "-",
+          "responsible": "Timon"
+        },
+        {
+          "id": "day-1-item-002",
+          "start": "09:00",
+          "end": "10:00",
+          "activity": "Campaign Pre-Briefing",
+          "remarks": "Incl. Safety Briefing & Declaration of Consent",
+          "responsible": "Timon & Jan"
+        },
+        {
+          "id": "day-1-item-003",
+          "start": "09:00",
+          "end": "10:00",
+          "activity": "DGUV Checks",
+          "remarks": "At EAC",
+          "responsible": "Miguel"
+        },
+        {
+          "id": "day-1-item-004",
+          "start": "10:00",
+          "end": "12:30",
+          "activity": "Preparation of regolith test field",
+          "remarks": "Crane Operation Boulder; Satellite Prop",
+          "responsible": "Timon & Sarah"
+        },
+        {
+          "id": "day-1-item-005",
+          "start": "10:00",
+          "end": "11:00",
+          "activity": "IM Connection Tests",
+          "remarks": "Preparation Room",
+          "responsible": "Miguel & Jan"
+        },
+        {
+          "id": "day-1-item-006",
+          "start": "12:30",
+          "end": "13:30",
+          "activity": "Lunch Break",
+          "remarks": "Back-Up in case of any problems during set-up",
+          "responsible": "-"
+        },
+        {
+          "id": "day-1-item-007",
+          "start": "13:30",
+          "end": "14:00",
+          "activity": "Test Run 1 EV Briefing",
+          "remarks": "Meeting & Visitor Room",
+          "responsible": "?"
+        },
+        {
+          "id": "day-1-item-008",
+          "start": "14:00",
+          "end": "14:30",
+          "activity": "Test Run 1 Donning",
+          "remarks": "-",
+          "responsible": "Miguel"
+        },
+        {
+          "id": "day-1-item-009",
+          "start": "14:30",
+          "end": "15:00",
+          "activity": "Test Run 1 Voice & IM check LUCC/GSOC/EVs",
+          "remarks": "-",
+          "responsible": "Timon"
+        },
+        {
+          "id": "day-1-item-010",
+          "start": "15:00",
+          "end": "16:15",
+          "activity": "Test Run 1",
+          "remarks": "-",
+          "responsible": "Timon & Jan"
+        },
+        {
+          "id": "day-1-item-011",
+          "start": "16:15",
+          "end": "16:45",
+          "activity": "Test Run 1 Doffing",
+          "remarks": "-",
+          "responsible": "Miguel"
+        },
+        {
+          "id": "day-1-item-012",
+          "start": "16:45",
+          "end": "17:00",
+          "activity": "Test Run 1 Survey",
+          "remarks": "Meeting Room",
+          "responsible": "Sarah"
+        },
+        {
+          "id": "day-1-item-013",
+          "start": "17:00",
+          "end": "17:30",
+          "activity": "Day 1 De-Briefing",
+          "remarks": "Meeting Room",
+          "responsible": "Timon"
+        }
+      ]
+    },
+    {
+      "id": "day-2",
+      "title": "Campaign Day 2 - Wednesday - 14.10.2026",
+      "items": [
+        {
+          "id": "day-2-item-014",
+          "start": "08:15",
+          "end": "08:30",
+          "activity": "Day 2 Pre-Briefing",
+          "remarks": "-",
+          "responsible": "Timon"
+        },
+        {
+          "id": "day-2-item-015",
+          "start": "08:30",
+          "end": "09:30",
+          "activity": "Preparation of Regolith Field",
+          "remarks": "-",
+          "responsible": "Jan & Sarah"
+        },
+        {
+          "id": "day-2-item-016",
+          "start": "08:30",
+          "end": "09:00",
+          "activity": "Test Run 2 EV Briefing",
+          "remarks": "Meeting Room & Visitor Room",
+          "responsible": "?"
+        },
+        {
+          "id": "day-2-item-017",
+          "start": "09:00",
+          "end": "09:30",
+          "activity": "Test Run 2 Donning",
+          "remarks": "-",
+          "responsible": "Miguel"
+        },
+        {
+          "id": "day-2-item-018",
+          "start": "09:30",
+          "end": "10:00",
+          "activity": "Test Run 2 Voice & IM check LUCC/GSOC/EVs",
+          "remarks": "-",
+          "responsible": "Timon"
+        },
+        {
+          "id": "day-2-item-019",
+          "start": "10:00",
+          "end": "11:15",
+          "activity": "Test Run 2",
+          "remarks": "-",
+          "responsible": "Timon & Jan"
+        },
+        {
+          "id": "day-2-item-020",
+          "start": "11:15",
+          "end": "11:30",
+          "activity": "Test Run 2 Doffing",
+          "remarks": "-",
+          "responsible": "Sarah"
+        },
+        {
+          "id": "day-2-item-021",
+          "start": "11:30",
+          "end": "11:45",
+          "activity": "Test Run 2 Survey",
+          "remarks": "Meeting Room",
+          "responsible": "Sarah"
+        },
+        {
+          "id": "day-2-item-022",
+          "start": "11:45",
+          "end": "12:45",
+          "activity": "Lunch Break",
+          "remarks": "-",
+          "responsible": "-"
+        },
+        {
+          "id": "day-2-item-023",
+          "start": "12:45",
+          "end": "13:45",
+          "activity": "Preparation of Regolith Field",
+          "remarks": "-",
+          "responsible": "Jan & Sarah"
+        },
+        {
+          "id": "day-2-item-024",
+          "start": "12:45",
+          "end": "13:15",
+          "activity": "Test Run 3 EV Briefing",
+          "remarks": "-",
+          "responsible": "?"
+        },
+        {
+          "id": "day-2-item-025",
+          "start": "13:15",
+          "end": "13:45",
+          "activity": "Test Run 3 Donning",
+          "remarks": "-",
+          "responsible": "Miguel"
+        },
+        {
+          "id": "day-2-item-026",
+          "start": "13:45",
+          "end": "14:15",
+          "activity": "Test Run 3 Voice & IM check LUCC/GSOC/EVs",
+          "remarks": "-",
+          "responsible": "Timon"
+        },
+        {
+          "id": "day-2-item-027",
+          "start": "14:15",
+          "end": "15:30",
+          "activity": "Test Run 3",
+          "remarks": "-",
+          "responsible": "Timon & Jan"
+        },
+        {
+          "id": "day-2-item-028",
+          "start": "15:00",
+          "end": "15:30",
+          "activity": "Test Run 4 EV Briefing",
+          "remarks": "Meeting Room",
+          "responsible": "?"
+        },
+        {
+          "id": "day-2-item-029",
+          "start": "15:30",
+          "end": "16:30",
+          "activity": "Preparation of Regolith Field",
+          "remarks": "-",
+          "responsible": "Jan & ?"
+        },
+        {
+          "id": "day-2-item-030",
+          "start": "15:30",
+          "end": "15:45",
+          "activity": "Test Run 3 Doffing",
+          "remarks": "-",
+          "responsible": "Sarah"
+        },
+        {
+          "id": "day-2-item-031",
+          "start": "15:45",
+          "end": "16:00",
+          "activity": "Test Run 3 Survey",
+          "remarks": "Meeting Room & Visitor Room",
+          "responsible": "Sarah"
+        },
+        {
+          "id": "day-2-item-032",
+          "start": "15:30",
+          "end": "16:00",
+          "activity": "Test Run 4 Donning",
+          "remarks": "-",
+          "responsible": "Miguel"
+        },
+        {
+          "id": "day-2-item-033",
+          "start": "16:00",
+          "end": "16:30",
+          "activity": "Test Run 4 Voice & IM check LUCC/GSOC/EVs",
+          "remarks": "-",
+          "responsible": "Timon"
+        },
+        {
+          "id": "day-2-item-034",
+          "start": "16:30",
+          "end": "17:45",
+          "activity": "Test Run 4",
+          "remarks": "-",
+          "responsible": "Timon & Jan"
+        },
+        {
+          "id": "day-2-item-035",
+          "start": "17:45",
+          "end": "18:00",
+          "activity": "Test Run 4 Doffing",
+          "remarks": "-",
+          "responsible": "Sarah"
+        },
+        {
+          "id": "day-2-item-036",
+          "start": "18:00",
+          "end": "18:15",
+          "activity": "Test Run 4 Survey",
+          "remarks": "Meeting Room",
+          "responsible": "Sarah"
+        },
+        {
+          "id": "day-2-item-037",
+          "start": "18:15",
+          "end": "18:30",
+          "activity": "Day 2 De-Briefing",
+          "remarks": "Meeting Room",
+          "responsible": "Timon"
+        }
+      ]
+    },
+    {
+      "id": "day-3",
+      "title": "Campaign Day 3 - Thursday - 15.10.2026",
+      "items": [
+        {
+          "id": "day-3-item-038",
+          "start": "08:15",
+          "end": "08:30",
+          "activity": "Day 3 Pre-Briefing",
+          "remarks": "-",
+          "responsible": "Timon"
+        },
+        {
+          "id": "day-3-item-039",
+          "start": "08:30",
+          "end": "09:30",
+          "activity": "Preparation of Regolith Field",
+          "remarks": "-",
+          "responsible": "Jan & Sarah"
+        },
+        {
+          "id": "day-3-item-040",
+          "start": "08:30",
+          "end": "09:00",
+          "activity": "Test Run 5 EV Briefing",
+          "remarks": "Meeting Room & Visitor Room",
+          "responsible": "?"
+        },
+        {
+          "id": "day-3-item-041",
+          "start": "09:00",
+          "end": "09:30",
+          "activity": "Test Run 5 Donning",
+          "remarks": "-",
+          "responsible": "Miguel"
+        },
+        {
+          "id": "day-3-item-042",
+          "start": "09:30",
+          "end": "10:00",
+          "activity": "Test Run 5 Voice & IM check LUCC/GSOC/EVs",
+          "remarks": "-",
+          "responsible": "Timon"
+        },
+        {
+          "id": "day-3-item-043",
+          "start": "10:00",
+          "end": "11:15",
+          "activity": "Test Run 5",
+          "remarks": "-",
+          "responsible": "Timon & Jan"
+        },
+        {
+          "id": "day-3-item-044",
+          "start": "11:15",
+          "end": "11:30",
+          "activity": "Test Run 5 Doffing",
+          "remarks": "-",
+          "responsible": "Sarah"
+        },
+        {
+          "id": "day-3-item-045",
+          "start": "11:30",
+          "end": "11:45",
+          "activity": "Test Run 5 Survey",
+          "remarks": "Meeting Room",
+          "responsible": "Sarah"
+        },
+        {
+          "id": "day-3-item-046",
+          "start": "11:45",
+          "end": "12:45",
+          "activity": "Lunch Break",
+          "remarks": "-",
+          "responsible": "-"
+        },
+        {
+          "id": "day-3-item-047",
+          "start": "12:45",
+          "end": "13:45",
+          "activity": "Preparation of Regolith Field",
+          "remarks": "-",
+          "responsible": "Jan & Sarah"
+        },
+        {
+          "id": "day-3-item-048",
+          "start": "12:45",
+          "end": "13:15",
+          "activity": "Test Run 6 EV Briefing",
+          "remarks": "-",
+          "responsible": "?"
+        },
+        {
+          "id": "day-3-item-049",
+          "start": "13:15",
+          "end": "13:45",
+          "activity": "Test Run 6 Donning",
+          "remarks": "-",
+          "responsible": "Miguel"
+        },
+        {
+          "id": "day-3-item-050",
+          "start": "13:45",
+          "end": "14:15",
+          "activity": "Test Run 6 Voice & IM check LUCC/GSOC/EVs",
+          "remarks": "-",
+          "responsible": "Timon"
+        },
+        {
+          "id": "day-3-item-051",
+          "start": "14:15",
+          "end": "15:30",
+          "activity": "Test Run 6",
+          "remarks": "-",
+          "responsible": "Timon & Jan"
+        },
+        {
+          "id": "day-3-item-052",
+          "start": "15:00",
+          "end": "15:30",
+          "activity": "Test Run 7 EV Briefing",
+          "remarks": "Meeting Room",
+          "responsible": "?"
+        },
+        {
+          "id": "day-3-item-053",
+          "start": "15:30",
+          "end": "16:30",
+          "activity": "Preparation of Regolith Field",
+          "remarks": "-",
+          "responsible": "Jan & ?"
+        },
+        {
+          "id": "day-3-item-054",
+          "start": "15:30",
+          "end": "15:45",
+          "activity": "Test Run 6 Doffing",
+          "remarks": "-",
+          "responsible": "Sarah"
+        },
+        {
+          "id": "day-3-item-055",
+          "start": "15:45",
+          "end": "16:00",
+          "activity": "Test Run 6 Survey",
+          "remarks": "Meeting Room & Visitor Room",
+          "responsible": "Sarah"
+        },
+        {
+          "id": "day-3-item-056",
+          "start": "15:30",
+          "end": "16:00",
+          "activity": "Test Run 7 Donning",
+          "remarks": "-",
+          "responsible": "Miguel"
+        },
+        {
+          "id": "day-3-item-057",
+          "start": "16:00",
+          "end": "16:30",
+          "activity": "Test Run 7 Voice & IM check LUCC/GSOC/EVs",
+          "remarks": "-",
+          "responsible": "Timon"
+        },
+        {
+          "id": "day-3-item-058",
+          "start": "16:30",
+          "end": "17:45",
+          "activity": "Test Run 7",
+          "remarks": "-",
+          "responsible": "Timon & Jan"
+        },
+        {
+          "id": "day-3-item-059",
+          "start": "17:45",
+          "end": "18:00",
+          "activity": "Test Run 7 Doffing",
+          "remarks": "-",
+          "responsible": "Sarah"
+        },
+        {
+          "id": "day-3-item-060",
+          "start": "18:00",
+          "end": "18:15",
+          "activity": "Test Run 7 Survey",
+          "remarks": "Meeting Room",
+          "responsible": "Sarah"
+        },
+        {
+          "id": "day-3-item-061",
+          "start": "18:15",
+          "end": "18:30",
+          "activity": "Day 3 De-Briefing",
+          "remarks": "Meeting Room",
+          "responsible": "Timon"
+        }
+      ]
+    },
+    {
+      "id": "day-4",
+      "title": "Campaign Day 4 - Friday - 16.10.2026",
+      "items": [
+        {
+          "id": "day-4-item-062",
+          "start": "08:15",
+          "end": "08:30",
+          "activity": "Day 4 Pre-Briefing",
+          "remarks": "Meeting Room",
+          "responsible": "Timon"
+        },
+        {
+          "id": "day-4-item-063",
+          "start": "08:30",
+          "end": "09:30",
+          "activity": "Preparation of Regolith Field",
+          "remarks": "-",
+          "responsible": "Jan & Sarah"
+        },
+        {
+          "id": "day-4-item-064",
+          "start": "08:30",
+          "end": "09:00",
+          "activity": "Test Run 8 EV Briefing",
+          "remarks": "Meeting Room",
+          "responsible": "?"
+        },
+        {
+          "id": "day-4-item-065",
+          "start": "09:00",
+          "end": "09:30",
+          "activity": "Test Run 8 Donning",
+          "remarks": "-",
+          "responsible": "Miguel"
+        },
+        {
+          "id": "day-4-item-066",
+          "start": "09:30",
+          "end": "10:00",
+          "activity": "Test Run 8 Voice & IM check LUCC/GSOC/EVs",
+          "remarks": "-",
+          "responsible": "Timon"
+        },
+        {
+          "id": "day-4-item-067",
+          "start": "10:00",
+          "end": "11:15",
+          "activity": "Test Run 8",
+          "remarks": "-",
+          "responsible": "Timon & Jan"
+        },
+        {
+          "id": "day-4-item-068",
+          "start": "11:15",
+          "end": "11:30",
+          "activity": "Test Run 8 Doffing",
+          "remarks": "-",
+          "responsible": "Sarah"
+        },
+        {
+          "id": "day-4-item-069",
+          "start": "11:30",
+          "end": "11:45",
+          "activity": "Test Run 8 Survey",
+          "remarks": "Meeting Room & Visitor Room",
+          "responsible": "Sarah"
+        },
+        {
+          "id": "day-4-item-070",
+          "start": "11:45",
+          "end": "12:45",
+          "activity": "Lunch",
+          "remarks": "-",
+          "responsible": "-"
+        },
+        {
+          "id": "day-4-item-071",
+          "start": "12:45",
+          "end": "15:00",
+          "activity": "Resetting of LUNA",
+          "remarks": "-",
+          "responsible": "All"
+        },
+        {
+          "id": "day-4-item-072",
+          "start": "15:00",
+          "end": "15:30",
+          "activity": "Campaign De-Briefing",
+          "remarks": "Meeting Room",
+          "responsible": "Timon"
+        }
+      ]
+    }
+  ],
+  "colors": {
+    "Timon": "#9fd3ff",
+    "Jan": "#ffe08a",
+    "Sarah": "#b7efc5",
+    "Miguel": "#ffb4a8",
+    "?": "#d4c2ff",
+    "-": "#d7dce5",
+    "All": "#000000"
+  },
+  "timeZone": "Europe/Berlin"
+}
