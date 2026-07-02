@@ -1,0 +1,1274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campaign Schedule Visualization</title>
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #667085;
+      --line: #d9dee8;
+      --strong-line: #b7c0d1;
+      --accent: #225ea8;
+      --danger: #b42318;
+      --shadow: 0 16px 40px rgba(16, 24, 40, 0.08);
+      --slot-height: 40px;
+      --time-width: 84px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 0.58rem 0.78rem;
+      cursor: pointer;
+    }
+
+    button:hover,
+    button:focus-visible {
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    .primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .danger {
+      color: var(--danger);
+      border-color: #f3b8b3;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      padding: 22px 28px 18px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(1.45rem, 2.4vw, 2rem);
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      max-width: 720px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-top: 18px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .tab {
+      white-space: nowrap;
+      border-color: var(--line);
+      color: var(--muted);
+    }
+
+    .tab.active {
+      background: #eaf2ff;
+      border-color: #9fc5ff;
+      color: #103b71;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 390px;
+      gap: 18px;
+      padding: 18px;
+      align-items: start;
+    }
+
+    .timeline-shell,
+    .side-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .timeline-shell {
+      overflow: hidden;
+    }
+
+    .timeline-head {
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      align-items: flex-start;
+    }
+
+    .timeline-head h2,
+    .side-panel h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .timeline-range {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .legend {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1px solid rgba(0, 0, 0, 0.16);
+      flex: 0 0 auto;
+    }
+
+    .timeline-scroll {
+      overflow-x: auto;
+      padding: 16px 18px 20px;
+    }
+
+    .timeline {
+      min-width: 920px;
+      position: relative;
+      display: grid;
+      grid-template-columns: var(--time-width) 1fr;
+    }
+
+    .time-axis {
+      position: relative;
+      border-right: 1px solid var(--strong-line);
+    }
+
+    .time-label {
+      position: absolute;
+      right: 12px;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .track {
+      position: relative;
+      min-height: 420px;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent calc(var(--slot-height) - 1px),
+          var(--line) calc(var(--slot-height) - 1px),
+          var(--line) var(--slot-height)
+        );
+    }
+
+    .time-label.quarter {
+      font-size: 0.72rem;
+      color: #8791a3;
+    }
+
+    .time-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #edf0f5;
+    }
+
+    .time-line.hour {
+      background: var(--strong-line);
+    }
+
+    .activity {
+      position: absolute;
+      min-height: 28px;
+      border: 1px solid #c8d0dd;
+      border-radius: 6px;
+      padding: 8px 9px;
+      overflow: hidden;
+      text-align: left;
+      background: #ffffff;
+      box-shadow: 0 8px 18px rgba(16, 24, 40, 0.09);
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .activity:hover,
+    .activity:focus-visible {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(16, 24, 40, 0.16);
+      z-index: 8;
+    }
+
+    .activity.selected {
+      outline: 3px solid rgba(34, 94, 168, 0.28);
+      z-index: 9;
+    }
+
+    .activity-title {
+      display: block;
+      padding-right: 58px;
+      font-weight: 700;
+      font-size: 0.86rem;
+      line-height: 1.18;
+      color: #101828;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .activity-meta {
+      display: block;
+      padding-right: 34px;
+      margin-top: 4px;
+      font-size: 0.76rem;
+      color: rgba(16, 24, 40, 0.74);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .person-dots {
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 4px;
+      max-width: 58px;
+      flex-wrap: wrap;
+    }
+
+    .person-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.24);
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.16);
+    }
+
+    .side-panel {
+      position: sticky;
+      top: 122px;
+      padding: 18px;
+    }
+
+    .detail {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+    }
+
+    .empty {
+      color: var(--muted);
+      margin: 12px 0 0;
+      line-height: 1.5;
+    }
+
+    .detail-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .detail-row {
+      display: grid;
+      gap: 3px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+    }
+
+    .value {
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 5px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.58rem 0.65rem;
+      background: white;
+      color: var(--ink);
+    }
+
+    textarea {
+      min-height: 78px;
+      resize: vertical;
+    }
+
+    .form-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .replace-person-form {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .replace-person-form select,
+    .replace-person-form input {
+      width: auto;
+      min-width: 132px;
+    }
+
+    .timezone-control {
+      width: auto;
+      min-width: 220px;
+    }
+
+    .table-wrap {
+      margin-top: 18px;
+      overflow-x: auto;
+      border-top: 1px solid var(--line);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 820px;
+      font-size: 0.88rem;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: #fbfcff;
+    }
+
+    tr:hover td {
+      background: #f7fbff;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    @media (max-width: 980px) {
+      header {
+        position: static;
+      }
+
+      .topbar {
+        display: grid;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .replace-person-form {
+        justify-content: flex-start;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .side-panel {
+        position: static;
+      }
+    }
+
+    @media (max-width: 620px) {
+      header,
+      main {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .timeline-head {
+        display: grid;
+      }
+
+      .legend {
+        justify-content: flex-start;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="topbar">
+        <div>
+          <h1>Campaign Schedule Visualization</h1>
+          <p class="subtitle">Four-day timeline with editable activities, remarks, and responsible-person color coding.</p>
+        </div>
+        <div class="actions">
+          <button class="primary" id="addNewBtn" type="button">Add Activity</button>
+          <select class="timezone-control" id="timezoneSelect" aria-label="Display timezone"></select>
+          <form class="replace-person-form" id="replacePersonForm">
+            <select id="replaceFromInput" aria-label="Person to replace" required></select>
+            <input id="replaceToInput" aria-label="Replacement person" placeholder="Replace with" required>
+            <button type="submit">Replace Person</button>
+          </form>
+          <button id="exportBtn" type="button">Export JSON</button>
+          <button id="importBtn" type="button">Import JSON</button>
+          <button id="resetBtn" class="danger" type="button">Reset</button>
+          <input class="file-input" id="importFile" type="file" accept="application/json,.json">
+        </div>
+      </div>
+      <nav class="tabs" id="dayTabs" aria-label="Campaign days"></nav>
+    </header>
+
+    <main>
+      <section class="timeline-shell">
+        <div class="timeline-head">
+          <div>
+            <h2 id="dayTitle"></h2>
+            <div class="timeline-range" id="timelineRange"></div>
+          </div>
+          <div class="legend" id="legend"></div>
+        </div>
+        <div class="timeline-scroll">
+          <div class="timeline" id="timeline"></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Activity</th>
+                <th>Remarks</th>
+                <th>Responsible</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="detail">
+          <h2>Activity Details</h2>
+          <div id="detailContent">
+            <p class="empty">Select an activity block or table row to view its remarks and edit it.</p>
+          </div>
+        </section>
+
+        <section>
+          <h2 id="formTitle">Add Activity</h2>
+          <form id="activityForm">
+            <input type="hidden" id="activityId">
+            <div class="form-grid">
+              <div class="field">
+                <label for="daySelect">Day</label>
+                <select id="daySelect" required></select>
+              </div>
+              <div class="field">
+                <label for="responsibleInput">Responsible</label>
+                <input id="responsibleInput" placeholder="Timon & Jan" required>
+              </div>
+              <div class="field">
+                <label for="startInput">Start</label>
+                <input id="startInput" type="time" required>
+              </div>
+              <div class="field">
+                <label for="endInput">End</label>
+                <input id="endInput" type="time" required>
+              </div>
+              <div class="field full">
+                <label for="activityInput">Activity</label>
+                <input id="activityInput" required>
+              </div>
+              <div class="field full">
+                <label for="remarksInput">Remarks</label>
+                <textarea id="remarksInput" placeholder="-"></textarea>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="primary" type="submit">Save Activity</button>
+              <button id="clearFormBtn" type="button">Clear</button>
+              <button id="deleteBtn" class="danger" type="button">Delete</button>
+            </div>
+          </form>
+        </section>
+
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "campaign-schedule-v1";
+    const SOURCE_TIME_ZONE = "Europe/Berlin";
+    const DEFAULT_DISPLAY_TIME_ZONE = "Europe/Berlin";
+    const TIME_ZONE_LABELS = {
+      "Europe/Berlin": "Germany Time - Cologne",
+      "America/Denver": "Colorado Time - Boulder"
+    };
+    const TIME_ZONE_ALIASES = {
+      "Europe/Cologne": "Europe/Berlin",
+      "America/Boulder": "America/Denver"
+    };
+    const DEFAULT_COLORS = {
+      "Timon": "#9fd3ff",
+      "Jan": "#ffe08a",
+      "Sarah": "#b7efc5",
+      "Miguel": "#ffb4a8",
+      "?": "#d4c2ff",
+      "-": "#d7dce5",
+      "All": "#000000"
+    };
+
+    const DEFAULT_DAYS = [
+      {
+        id: "day-1",
+        title: "Campaign Day 1 - Tuesday - 13.10.2026",
+        items: [
+          item("08:30", "09:00", "LUNA facility introduction", "-", "Timon"),
+          item("09:00", "10:00", "Campaign Pre-Briefing", "Incl. Safety Briefing & Declaration of Consent", "Timon & Jan"),
+          item("09:00", "10:00", "DGUV Checks", "At EAC", "Miguel"),
+          item("10:00", "12:30", "Preparation of regolith test field", "Crane Operation Boulder; Satellite Prop", "Timon & Sarah"),
+          item("10:00", "11:00", "IM Connection Tests", "Preparation Room", "Miguel & Jan"),
+          item("12:30", "13:30", "Lunch Break", "Back-Up in case of any problems during set-up", "-"),
+          item("13:30", "14:00", "Test Run 1 EV Briefing", "Meeting & Visitor Room", "?"),
+          item("14:00", "14:30", "Test Run 1 Donning", "-", "Miguel"),
+          item("14:30", "15:00", "Test Run 1 Voice & IM check LUCC/GSOC/EVs", "-", "Timon"),
+          item("15:00", "16:15", "Test Run 1", "-", "Timon & Jan"),
+          item("16:15", "16:45", "Test Run 1 Doffing", "-", "Miguel"),
+          item("16:45", "17:00", "Test Run 1 Survey", "Meeting Room", "Sarah"),
+          item("17:00", "17:30", "Day 1 De-Briefing", "Meeting Room", "Timon")
+        ]
+      },
+      {
+        id: "day-2",
+        title: "Campaign Day 2 - Wednesday - 14.10.2026",
+        items: [
+          item("08:15", "08:30", "Day 2 Pre-Briefing", "-", "Timon"),
+          item("08:30", "09:30", "Preparation of Regolith Field", "-", "Jan & Sarah"),
+          item("08:30", "09:00", "Test Run 2 EV Briefing", "Meeting Room & Visitor Room", "?"),
+          item("09:00", "09:30", "Test Run 2 Donning", "-", "Miguel"),
+          item("09:30", "10:00", "Test Run 2 Voice & IM check LUCC/GSOC/EVs", "-", "Timon"),
+          item("10:00", "11:15", "Test Run 2", "-", "Timon & Jan"),
+          item("11:15", "11:30", "Test Run 2 Doffing", "-", "Sarah"),
+          item("11:30", "11:45", "Test Run 2 Survey", "Meeting Room", "Sarah"),
+          item("11:45", "12:45", "Lunch Break", "-", "-"),
+          item("12:45", "13:45", "Preparation of Regolith Field", "-", "Jan & Sarah"),
+          item("12:45", "13:15", "Test Run 3 EV Briefing", "-", "?"),
+          item("13:15", "13:45", "Test Run 3 Donning", "-", "Miguel"),
+          item("13:45", "14:15", "Test Run 3 Voice & IM check LUCC/GSOC/EVs", "-", "Timon"),
+          item("14:15", "15:30", "Test Run 3", "-", "Timon & Jan"),
+          item("15:00", "15:30", "Test Run 4 EV Briefing", "Meeting Room", "?"),
+          item("15:30", "16:30", "Preparation of Regolith Field", "-", "Jan & ?"),
+          item("15:30", "15:45", "Test Run 3 Doffing", "-", "Sarah"),
+          item("15:45", "16:00", "Test Run 3 Survey", "Meeting Room & Visitor Room", "Sarah"),
+          item("15:30", "16:00", "Test Run 4 Donning", "-", "Miguel"),
+          item("16:00", "16:30", "Test Run 4 Voice & IM check LUCC/GSOC/EVs", "-", "Timon"),
+          item("16:30", "17:45", "Test Run 4", "-", "Timon & Jan"),
+          item("17:45", "18:00", "Test Run 4 Doffing", "-", "Sarah"),
+          item("18:00", "18:15", "Test Run 4 Survey", "Meeting Room", "Sarah"),
+          item("18:15", "18:30", "Day 2 De-Briefing", "Meeting Room", "Timon")
+        ]
+      },
+      {
+        id: "day-3",
+        title: "Campaign Day 3 - Thursday - 15.10.2026",
+        items: [
+          item("08:15", "08:30", "Day 3 Pre-Briefing", "-", "Timon"),
+          item("08:30", "09:30", "Preparation of Regolith Field", "-", "Jan & Sarah"),
+          item("08:30", "09:00", "Test Run 5 EV Briefing", "Meeting Room & Visitor Room", "?"),
+          item("09:00", "09:30", "Test Run 5 Donning", "-", "Miguel"),
+          item("09:30", "10:00", "Test Run 5 Voice & IM check LUCC/GSOC/EVs", "-", "Timon"),
+          item("10:00", "11:15", "Test Run 5", "-", "Timon & Jan"),
+          item("11:15", "11:30", "Test Run 5 Doffing", "-", "Sarah"),
+          item("11:30", "11:45", "Test Run 5 Survey", "Meeting Room", "Sarah"),
+          item("11:45", "12:45", "Lunch Break", "-", "-"),
+          item("12:45", "13:45", "Preparation of Regolith Field", "-", "Jan & Sarah"),
+          item("12:45", "13:15", "Test Run 6 EV Briefing", "-", "?"),
+          item("13:15", "13:45", "Test Run 6 Donning", "-", "Miguel"),
+          item("13:45", "14:15", "Test Run 6 Voice & IM check LUCC/GSOC/EVs", "-", "Timon"),
+          item("14:15", "15:30", "Test Run 6", "-", "Timon & Jan"),
+          item("15:00", "15:30", "Test Run 7 EV Briefing", "Meeting Room", "?"),
+          item("15:30", "16:30", "Preparation of Regolith Field", "-", "Jan & ?"),
+          item("15:30", "15:45", "Test Run 6 Doffing", "-", "Sarah"),
+          item("15:45", "16:00", "Test Run 6 Survey", "Meeting Room & Visitor Room", "Sarah"),
+          item("15:30", "16:00", "Test Run 7 Donning", "-", "Miguel"),
+          item("16:00", "16:30", "Test Run 7 Voice & IM check LUCC/GSOC/EVs", "-", "Timon"),
+          item("16:30", "17:45", "Test Run 7", "-", "Timon & Jan"),
+          item("17:45", "18:00", "Test Run 7 Doffing", "-", "Sarah"),
+          item("18:00", "18:15", "Test Run 7 Survey", "Meeting Room", "Sarah"),
+          item("18:15", "18:30", "Day 3 De-Briefing", "Meeting Room", "Timon")
+        ]
+      },
+      {
+        id: "day-4",
+        title: "Campaign Day 4 - Friday - 16.10.2026",
+        items: [
+          item("08:15", "08:30", "Day 4 Pre-Briefing", "Meeting Room", "Timon"),
+          item("08:30", "09:30", "Preparation of Regolith Field", "-", "Jan & Sarah"),
+          item("08:30", "09:00", "Test Run 8 EV Briefing", "Meeting Room", "?"),
+          item("09:00", "09:30", "Test Run 8 Donning", "-", "Miguel"),
+          item("09:30", "10:00", "Test Run 8 Voice & IM check LUCC/GSOC/EVs", "-", "Timon"),
+          item("10:00", "11:15", "Test Run 8", "-", "Timon & Jan"),
+          item("11:15", "11:30", "Test Run 8 Doffing", "-", "Sarah"),
+          item("11:30", "11:45", "Test Run 8 Survey", "Meeting Room & Visitor Room", "Sarah"),
+          item("11:45", "12:45", "Lunch", "-", "-"),
+          item("12:45", "15:00", "Resetting of LUNA", "-", "All"),
+          item("15:00", "15:30", "Campaign De-Briefing", "Meeting Room", "Timon")
+        ]
+      }
+    ];
+
+    let { days, colors, timeZone } = loadState();
+    let currentDayId = days[0].id;
+    let selectedId = null;
+
+    const dayTabs = document.getElementById("dayTabs");
+    const dayTitle = document.getElementById("dayTitle");
+    const timelineRange = document.getElementById("timelineRange");
+    const timeline = document.getElementById("timeline");
+    const legend = document.getElementById("legend");
+    const scheduleTable = document.getElementById("scheduleTable");
+    const detailContent = document.getElementById("detailContent");
+    const form = document.getElementById("activityForm");
+    const formTitle = document.getElementById("formTitle");
+    const deleteBtn = document.getElementById("deleteBtn");
+    const importFile = document.getElementById("importFile");
+    const replacePersonForm = document.getElementById("replacePersonForm");
+    const replaceFromInput = document.getElementById("replaceFromInput");
+    const replaceToInput = document.getElementById("replaceToInput");
+    const timezoneSelect = document.getElementById("timezoneSelect");
+
+    function item(start, end, activity, remarks, responsible) {
+      return {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+        start,
+        end,
+        activity,
+        remarks,
+        responsible
+      };
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return { days: structuredClone(DEFAULT_DAYS), colors: structuredClone(DEFAULT_COLORS), timeZone: DEFAULT_DISPLAY_TIME_ZONE };
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length) {
+          return { days: parsed, colors: structuredClone(DEFAULT_COLORS), timeZone: DEFAULT_DISPLAY_TIME_ZONE };
+        }
+        if (Array.isArray(parsed.days) && parsed.days.length) {
+          return { days: parsed.days, colors: { ...DEFAULT_COLORS, ...(parsed.colors || {}) }, timeZone: normalizeTimeZone(parsed.timeZone) };
+        }
+        return { days: structuredClone(DEFAULT_DAYS), colors: structuredClone(DEFAULT_COLORS), timeZone: DEFAULT_DISPLAY_TIME_ZONE };
+      } catch {
+        return { days: structuredClone(DEFAULT_DAYS), colors: structuredClone(DEFAULT_COLORS), timeZone: DEFAULT_DISPLAY_TIME_ZONE };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ days, colors, timeZone }));
+    }
+
+    function normalizeTimeZone(zone) {
+      return TIME_ZONE_ALIASES[zone] || zone || DEFAULT_DISPLAY_TIME_ZONE;
+    }
+
+    function minutes(time) {
+      const [hour, minute] = time.split(":").map(Number);
+      return hour * 60 + minute;
+    }
+
+    function timeLabel(total) {
+      const normalized = ((total % 1440) + 1440) % 1440;
+      const hour = String(Math.floor(normalized / 60)).padStart(2, "0");
+      const minute = String(normalized % 60).padStart(2, "0");
+      return `${hour}:${minute}`;
+    }
+
+    function datePartsFromTitle(title) {
+      const match = title.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+      if (!match) return { year: 2026, month: 10, day: 13 };
+      return { day: Number(match[1]), month: Number(match[2]), year: Number(match[3]) };
+    }
+
+    function zonedParts(date, zone) {
+      const formatter = new Intl.DateTimeFormat("en-CA", {
+        timeZone: zone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23"
+      });
+      const parts = Object.fromEntries(formatter.formatToParts(date).map(part => [part.type, part.value]));
+      return {
+        year: Number(parts.year),
+        month: Number(parts.month),
+        day: Number(parts.day),
+        hour: Number(parts.hour),
+        minute: Number(parts.minute)
+      };
+    }
+
+    function zonedTimeToDate(parts, zone) {
+      let guess = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute);
+      for (let i = 0; i < 3; i += 1) {
+        const actual = zonedParts(new Date(guess), zone);
+        const desiredUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute);
+        const actualUtc = Date.UTC(actual.year, actual.month - 1, actual.day, actual.hour, actual.minute);
+        guess += desiredUtc - actualUtc;
+      }
+      return new Date(guess);
+    }
+
+    function entryDate(day, time) {
+      const dateParts = datePartsFromTitle(day.title);
+      const [hour, minute] = time.split(":").map(Number);
+      return zonedTimeToDate({ ...dateParts, hour, minute }, SOURCE_TIME_ZONE);
+    }
+
+    function displayEntry(day, entry) {
+      const startDate = entryDate(day, entry.start);
+      const endDate = entryDate(day, entry.end);
+      const startParts = zonedParts(startDate, timeZone);
+      const endParts = zonedParts(endDate, timeZone);
+      const baseParts = datePartsFromTitle(day.title);
+      const baseDate = zonedTimeToDate({ ...baseParts, hour: 0, minute: 0 }, timeZone);
+      const startMinutes = Math.round((startDate - baseDate) / 60000);
+      const endMinutes = Math.round((endDate - baseDate) / 60000);
+      return {
+        ...entry,
+        displayStart: timeLabel(startParts.hour * 60 + startParts.minute),
+        displayEnd: timeLabel(endParts.hour * 60 + endParts.minute),
+        displayStartMinutes: startMinutes,
+        displayEndMinutes: endMinutes
+      };
+    }
+
+    function sourceTimeFromDisplay(day, time) {
+      const dateParts = datePartsFromTitle(day.title);
+      const [hour, minute] = time.split(":").map(Number);
+      const displayDate = zonedTimeToDate({ ...dateParts, hour, minute }, timeZone);
+      const sourceParts = zonedParts(displayDate, SOURCE_TIME_ZONE);
+      return timeLabel(sourceParts.hour * 60 + sourceParts.minute);
+    }
+
+    function getDay() {
+      return days.find(day => day.id === currentDayId) || days[0];
+    }
+
+    function peopleFor(responsible) {
+      return responsible
+        .split("&")
+        .map(part => part.trim())
+        .filter(Boolean);
+    }
+
+    function colorFor(person) {
+      if (person === "All") return "#000000";
+      return colors[person] || "#c7d7fe";
+    }
+
+    function personDots(responsible) {
+      return peopleFor(responsible)
+        .map(person => `<span class="person-dot" title="${escapeHtml(person)}" style="background:${colorFor(person)}"></span>`)
+        .join("");
+    }
+
+    function layoutItems(items) {
+      const sorted = [...items].sort((a, b) => a.displayStartMinutes - b.displayStartMinutes || a.displayEndMinutes - b.displayEndMinutes);
+      const lanes = [];
+      return sorted.map(entry => {
+        const start = entry.displayStartMinutes;
+        const end = entry.displayEndMinutes;
+        let laneIndex = lanes.findIndex(laneEnd => start >= laneEnd);
+        if (laneIndex === -1) {
+          laneIndex = lanes.length;
+          lanes.push(end);
+        } else {
+          lanes[laneIndex] = end;
+        }
+        return { ...entry, laneIndex, laneCount: lanes.length };
+      }).map(entry => ({ ...entry, laneCount: Math.max(...lanes.map((_, i) => i + 1), 1) }));
+    }
+
+    function renderTabs() {
+      dayTabs.innerHTML = "";
+      days.forEach(day => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `tab${day.id === currentDayId ? " active" : ""}`;
+        button.textContent = day.title.replace("Campaign ", "");
+        button.addEventListener("click", () => {
+          currentDayId = day.id;
+          selectedId = null;
+          render();
+        });
+        dayTabs.appendChild(button);
+      });
+    }
+
+    function renderDayOptions() {
+      const select = document.getElementById("daySelect");
+      select.innerHTML = "";
+      days.forEach(day => {
+        const option = document.createElement("option");
+        option.value = day.id;
+        option.textContent = day.title;
+        select.appendChild(option);
+      });
+    }
+
+    function renderTimezoneOptions() {
+      const zones = Intl.supportedValuesOf ? Intl.supportedValuesOf("timeZone") : [
+        "Europe/Berlin",
+        "America/Denver",
+        "UTC"
+      ];
+      const orderedZones = [...new Set([SOURCE_TIME_ZONE, "America/Denver", ...zones])];
+      timezoneSelect.innerHTML = "";
+      orderedZones.forEach(zone => {
+        const option = document.createElement("option");
+        option.value = zone;
+        option.textContent = TIME_ZONE_LABELS[zone] || zone;
+        timezoneSelect.appendChild(option);
+      });
+      timeZone = normalizeTimeZone(timeZone);
+      timezoneSelect.value = orderedZones.includes(timeZone) ? timeZone : DEFAULT_DISPLAY_TIME_ZONE;
+    }
+
+    function renderTimeline(day) {
+      const items = day.items.map(entry => displayEntry(day, entry));
+      const dayStart = Math.floor(Math.min(...items.map(entry => entry.displayStartMinutes)) / 60) * 60;
+      const dayEnd = Math.ceil(Math.max(...items.map(entry => entry.displayEndMinutes)) / 60) * 60;
+      const totalMinutes = dayEnd - dayStart;
+      const pixelsPerMinute = 40 / 15;
+      const height = Math.max(420, totalMinutes * pixelsPerMinute);
+      const laidOut = layoutItems(items);
+      const maxLane = Math.max(...laidOut.map(entry => entry.laneIndex), 0) + 1;
+
+      dayTitle.textContent = day.title;
+      timelineRange.textContent = `${timeLabel(dayStart)} - ${timeLabel(dayEnd)}`;
+      timeline.innerHTML = "";
+      timeline.style.minHeight = `${height}px`;
+
+      const axis = document.createElement("div");
+      axis.className = "time-axis";
+      axis.style.height = `${height}px`;
+
+      const track = document.createElement("div");
+      track.className = "track";
+      track.style.height = `${height}px`;
+
+      for (let mark = dayStart; mark <= dayEnd; mark += 15) {
+        const top = (mark - dayStart) * pixelsPerMinute;
+        const label = document.createElement("div");
+        label.className = `time-label${mark % 60 === 0 ? "" : " quarter"}`;
+        label.style.top = `${top}px`;
+        label.textContent = timeLabel(mark);
+        axis.appendChild(label);
+
+        const line = document.createElement("div");
+        line.className = `time-line${mark % 60 === 0 ? " hour" : ""}`;
+        line.style.top = `${top}px`;
+        track.appendChild(line);
+      }
+
+      laidOut.forEach(entry => {
+        const top = (entry.displayStartMinutes - dayStart) * pixelsPerMinute;
+        const heightPx = Math.max(30, (entry.displayEndMinutes - entry.displayStartMinutes) * pixelsPerMinute - 6);
+        const laneWidth = 100 / maxLane;
+        const left = entry.laneIndex * laneWidth;
+        const block = document.createElement("button");
+        block.type = "button";
+        block.className = `activity${entry.id === selectedId ? " selected" : ""}`;
+        block.style.top = `${top + 3}px`;
+        block.style.height = `${heightPx}px`;
+        block.style.left = `calc(${left}% + 8px)`;
+        block.style.width = `calc(${laneWidth}% - 14px)`;
+        block.title = `${entry.displayStart} - ${entry.displayEnd}: ${entry.activity}`;
+        block.innerHTML = `<span class="person-dots">${personDots(entry.responsible)}</span><span class="activity-title">${escapeHtml(entry.activity)}</span><span class="activity-meta">${entry.displayStart} - ${entry.displayEnd} | ${escapeHtml(entry.responsible)}</span>`;
+        block.addEventListener("click", () => selectActivity(entry.id));
+        track.appendChild(block);
+      });
+
+      timeline.append(axis, track);
+    }
+
+    function renderLegend(day) {
+      const values = [...new Set([...Object.keys(colors), ...day.items.flatMap(entry => peopleFor(entry.responsible))])].sort();
+      legend.innerHTML = "";
+      values.forEach(value => {
+        const color = colorFor(value);
+        const item = document.createElement("span");
+        item.className = "legend-item";
+        item.innerHTML = `<span class="swatch" style="background:${color}"></span>${escapeHtml(value)}`;
+        legend.appendChild(item);
+      });
+    }
+
+    function allPeople() {
+      return [...new Set([...Object.keys(colors), ...days.flatMap(day => day.items.flatMap(entry => peopleFor(entry.responsible)))])].sort();
+    }
+
+    function renderPersonReplacementOptions() {
+      const currentValue = replaceFromInput.value;
+      replaceFromInput.innerHTML = "";
+      allPeople().forEach(person => {
+        const option = document.createElement("option");
+        option.value = person;
+        option.textContent = person;
+        replaceFromInput.appendChild(option);
+      });
+      if (currentValue && allPeople().includes(currentValue)) replaceFromInput.value = currentValue;
+    }
+
+    function renderTable(day) {
+      const rows = day.items.map(entry => displayEntry(day, entry)).sort((a, b) => a.displayStartMinutes - b.displayStartMinutes || a.displayEndMinutes - b.displayEndMinutes);
+      scheduleTable.innerHTML = "";
+      rows.forEach(entry => {
+        const tr = document.createElement("tr");
+        tr.tabIndex = 0;
+        tr.innerHTML = `
+          <td>${entry.displayStart} - ${entry.displayEnd}</td>
+          <td>${escapeHtml(entry.activity)}</td>
+          <td>${escapeHtml(entry.remarks || "-")}</td>
+          <td>${escapeHtml(entry.responsible)}</td>
+        `;
+        tr.addEventListener("click", () => selectActivity(entry.id));
+        tr.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") selectActivity(entry.id);
+        });
+        scheduleTable.appendChild(tr);
+      });
+    }
+
+    function renderDetail(day) {
+      const entry = day.items.find(item => item.id === selectedId);
+      if (!entry) {
+        detailContent.innerHTML = `<p class="empty">Select an activity block or table row to view its remarks and edit it.</p>`;
+        deleteBtn.disabled = true;
+        return;
+      }
+
+      deleteBtn.disabled = false;
+      detailContent.innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-row"><span class="label">Time</span><span class="value">${displayEntry(day, entry).displayStart} - ${displayEntry(day, entry).displayEnd}</span></div>
+          <div class="detail-row"><span class="label">Activity</span><span class="value">${escapeHtml(entry.activity)}</span></div>
+          <div class="detail-row"><span class="label">Remarks</span><span class="value">${escapeHtml(entry.remarks || "-")}</span></div>
+          <div class="detail-row"><span class="label">Responsible</span><span class="value">${escapeHtml(entry.responsible)}</span></div>
+        </div>
+      `;
+    }
+
+    function selectActivity(id) {
+      selectedId = id;
+      const day = getDay();
+      const entry = day.items.find(item => item.id === id);
+      if (entry) fillForm(day.id, entry);
+      render();
+    }
+
+    function fillForm(dayId, entry) {
+      formTitle.textContent = "Edit Activity";
+      document.getElementById("activityId").value = entry.id;
+      document.getElementById("daySelect").value = dayId;
+      document.getElementById("responsibleInput").value = entry.responsible;
+      const day = days.find(candidate => candidate.id === dayId);
+      const displayed = displayEntry(day, entry);
+      document.getElementById("startInput").value = displayed.displayStart;
+      document.getElementById("endInput").value = displayed.displayEnd;
+      document.getElementById("activityInput").value = entry.activity;
+      document.getElementById("remarksInput").value = entry.remarks;
+    }
+
+    function clearForm() {
+      formTitle.textContent = "Add Activity";
+      form.reset();
+      document.getElementById("activityId").value = "";
+      document.getElementById("daySelect").value = currentDayId;
+      document.getElementById("remarksInput").value = "-";
+      selectedId = null;
+      render();
+    }
+
+    function handleSubmit(event) {
+      event.preventDefault();
+      const id = document.getElementById("activityId").value;
+      const dayId = document.getElementById("daySelect").value;
+      const selectedDay = days.find(day => day.id === dayId);
+      const start = document.getElementById("startInput").value;
+      const end = document.getElementById("endInput").value;
+      if (minutes(end) <= minutes(start)) {
+        alert("End time must be after start time.");
+        return;
+      }
+
+      const next = {
+        id: id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random())),
+        start: sourceTimeFromDisplay(selectedDay, start),
+        end: sourceTimeFromDisplay(selectedDay, end),
+        activity: document.getElementById("activityInput").value.trim(),
+        remarks: document.getElementById("remarksInput").value.trim() || "-",
+        responsible: document.getElementById("responsibleInput").value.trim()
+      };
+
+      days.forEach(day => {
+        day.items = day.items.filter(entry => entry.id !== id);
+      });
+      const targetDay = days.find(day => day.id === dayId);
+      targetDay.items.push(next);
+      currentDayId = dayId;
+      selectedId = next.id;
+      saveState();
+      render();
+      fillForm(dayId, next);
+    }
+
+    function deleteSelected() {
+      if (!selectedId) return;
+      if (!confirm("Delete this activity?")) return;
+      days.forEach(day => {
+        day.items = day.items.filter(entry => entry.id !== selectedId);
+      });
+      selectedId = null;
+      saveState();
+      clearForm();
+    }
+
+    function exportJson() {
+      const blob = new Blob([JSON.stringify({ days, colors }, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "campaign-schedule.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importJson(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          const importedDays = Array.isArray(parsed) ? parsed : parsed.days;
+          const importedColors = Array.isArray(parsed) ? {} : parsed.colors;
+          if (!Array.isArray(importedDays) || importedDays.some(day => !day.id || !day.title || !Array.isArray(day.items))) {
+            throw new Error("Invalid schedule format.");
+          }
+          days = importedDays;
+          colors = { ...DEFAULT_COLORS, ...(importedColors || {}) };
+          timeZone = normalizeTimeZone(parsed.timeZone || timeZone);
+          currentDayId = days[0].id;
+          selectedId = null;
+          saveState();
+          render();
+          clearForm();
+        } catch (error) {
+          alert(error.message || "Could not import schedule JSON.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetSchedule() {
+      if (!confirm("Reset the schedule to the original Word document data?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      days = structuredClone(DEFAULT_DAYS);
+      colors = structuredClone(DEFAULT_COLORS);
+      timeZone = DEFAULT_DISPLAY_TIME_ZONE;
+      currentDayId = days[0].id;
+      selectedId = null;
+      render();
+      clearForm();
+    }
+
+    function replacePerson(event) {
+      event.preventDefault();
+      const from = replaceFromInput.value.trim();
+      const to = replaceToInput.value.trim();
+      if (!from || !to || from === to) return;
+
+      days.forEach(day => {
+        day.items.forEach(entry => {
+          const nextPeople = peopleFor(entry.responsible).map(person => person === from ? to : person);
+          entry.responsible = [...new Set(nextPeople)].join(" & ");
+        });
+      });
+      if (!colors[to]) colors[to] = colors[from] || "#c7d7fe";
+      delete colors[from];
+
+      const responsibleInput = document.getElementById("responsibleInput");
+      if (responsibleInput.value.trim()) {
+        const nextPeople = peopleFor(responsibleInput.value).map(person => person === from ? to : person);
+        responsibleInput.value = [...new Set(nextPeople)].join(" & ");
+      }
+      saveState();
+      replacePersonForm.reset();
+      render();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function render() {
+      const day = getDay();
+      renderTabs();
+      renderDayOptions();
+      renderTimezoneOptions();
+      renderTimeline(day);
+      renderLegend(day);
+      renderPersonReplacementOptions();
+      renderTable(day);
+      renderDetail(day);
+      document.getElementById("daySelect").value = currentDayId;
+    }
+
+    form.addEventListener("submit", handleSubmit);
+    replacePersonForm.addEventListener("submit", replacePerson);
+    timezoneSelect.addEventListener("change", event => {
+      timeZone = normalizeTimeZone(event.target.value);
+      saveState();
+      render();
+      const day = getDay();
+      const entry = day.items.find(item => item.id === selectedId);
+      if (entry) fillForm(day.id, entry);
+    });
+    document.getElementById("clearFormBtn").addEventListener("click", clearForm);
+    document.getElementById("deleteBtn").addEventListener("click", deleteSelected);
+    document.getElementById("addNewBtn").addEventListener("click", clearForm);
+    document.getElementById("exportBtn").addEventListener("click", exportJson);
+    document.getElementById("importBtn").addEventListener("click", () => importFile.click());
+    document.getElementById("resetBtn").addEventListener("click", resetSchedule);
+    importFile.addEventListener("change", event => {
+      const [file] = event.target.files;
+      if (file) importJson(file);
+      event.target.value = "";
+    });
+
+    render();
+    clearForm();
+  </script>
+</body>
+</html>
