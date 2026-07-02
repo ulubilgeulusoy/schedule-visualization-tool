@@ -623,6 +623,7 @@
   </div>
 
   <script type="module">
+    import { firebaseConfig, campaignDocPath } from "./firebase-config.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
     import {
       getAuth,
@@ -641,19 +642,10 @@
     } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
     const STORAGE_KEY = "campaign-schedule-v1";
-    const CAMPAIGN_DOC_PATH = ["campaigns", "adapt2-2026"];
-    const firebaseConfig = {
-      apiKey: "AIzaSyDdtJlVRDXr8x3k9GCfOzGpOhGqvidkiu8",
-      authDomain: "adapt2-schedule.firebaseapp.com",
-      projectId: "adapt2-schedule",
-      storageBucket: "adapt2-schedule.firebasestorage.app",
-      messagingSenderId: "235290453657",
-      appId: "1:235290453657:web:3bf4328a890eba9174fa08"
-    };
     const firebaseApp = initializeApp(firebaseConfig);
     const auth = getAuth(firebaseApp);
     const db = getFirestore(firebaseApp);
-    const campaignRef = doc(db, ...CAMPAIGN_DOC_PATH);
+    const campaignRef = doc(db, ...campaignDocPath);
 
     const SOURCE_TIME_ZONE = "Europe/Berlin";
     const DEFAULT_DISPLAY_TIME_ZONE = "Europe/Berlin";
