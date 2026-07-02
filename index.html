@@ -833,7 +833,7 @@
           ...state,
           updatedAt: serverTimestamp(),
           updatedBy: currentUser.email || currentUser.uid
-        }, { merge: true });
+        });
       } catch (error) {
         alert(`Could not save to Firebase: ${error.message}`);
       }
@@ -1077,7 +1077,7 @@
     }
 
     function renderLegend(day) {
-      const values = [...new Set([...Object.keys(colors), ...day.items.flatMap(entry => peopleFor(entry.responsible))])].sort();
+      const values = [...new Set(day.items.flatMap(entry => peopleFor(entry.responsible)))].sort();
       legend.innerHTML = "";
       values.forEach(value => {
         const color = colorFor(value);
@@ -1089,7 +1089,7 @@
     }
 
     function allPeople() {
-      return [...new Set([...Object.keys(colors), ...days.flatMap(day => day.items.flatMap(entry => peopleFor(entry.responsible)))])].sort();
+      return [...new Set(days.flatMap(day => day.items.flatMap(entry => peopleFor(entry.responsible))))].sort();
     }
 
     function renderPersonReplacementOptions(preferredValue = replaceFromInput.value) {
